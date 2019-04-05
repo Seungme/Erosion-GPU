@@ -15,8 +15,6 @@ class PPM {
 public:
     PPM(int width, int height);
 
-    std::string toPPM();
-
     void writePPM(const std::string &filename);
 private:
 
