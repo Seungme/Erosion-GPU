@@ -19,17 +19,17 @@ void PPM::writePPM(const std::string &filename) {
     os << "255\n";
 
     // TODO Write pixels
-//    // Example
+    // Example
 
-//    unsigned length = 0;
-//    for (int y = 0; y < height; ++y) {
-//        for (int x = 0; x < width; ++x) {
-//            os.put(static_cast<char>(pixels[length].getR()));
-//            os.put(static_cast<char>(pixels[length].getG()));
-//            os.put(static_cast<char>(pixels[length].getB()));
-//            ++length;
-//        }
-//    }
+    unsigned length = 0;
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            os.put(pixels[length]);
+            os.put(pixels[length]);
+            os.put(pixels[length]);
+            ++length;
+        }
+    }
     os.close();
 }
 
