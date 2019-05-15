@@ -86,18 +86,31 @@ void crossKernel() {
 void complexImage(Image &img, unsigned iterations) {
     Chronometer chrono = Chronometer();
 
+//    std::vector<unsigned char> kernel = std::vector<unsigned char> {
+//            0, 1, 0,
+//            1, 1, 1,
+//            0, 1, 0
+//    };
+
+
     std::vector<unsigned char> kernel = std::vector<unsigned char> {
-            0, 1, 0,
-            1, 1, 1,
-            0, 1, 0
+            1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1
     };
 
     img.writePPM("before.ppm");
-    auto dilated = Morphology::dilate(img, kernel, 3, 3, iterations);
+    auto dilated = Morphology::dilate(img, kernel, 9, 9, iterations);
     dilated.writePPM("after_dilate.ppm");
-    auto eroded = Morphology::erode(img, kernel, 3, 3, iterations);
+    auto eroded = Morphology::erode(img, kernel, 9, 9, iterations);
     eroded.writePPM("after_erode.ppm");
-    auto dilatedEroded = Morphology::erode(dilated, kernel, 3, 3, iterations);
+    auto dilatedEroded = Morphology::erode(dilated, kernel, 9, 9, iterations);
     dilatedEroded.writePPM("after_dilate_erode.ppm");
 }
 
@@ -106,6 +119,6 @@ int main() {
 
 //    crossKernel();
     Image loaded = Image::fromPPM("../Data/compo.ppm");
-    complexImage(loaded, 10);
+    complexImage(loaded, 1);
     return 0;
 }

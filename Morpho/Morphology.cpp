@@ -23,7 +23,7 @@ unsigned char unitDilate(const std::vector<unsigned char> &vals) {
 Image Morphology::erode(Image &img, const std::vector<unsigned char> &kernel, int w, int h, unsigned iteration) {
     Image r = img;
     for (int i = 0; i < iteration; ++i) {
-        r = convolute(r, kernel, w, h, unitErode);
+        r = convolute(r, kernel, w, h, unitErode, 255);
 
     }
     return r;
@@ -32,13 +32,13 @@ Image Morphology::erode(Image &img, const std::vector<unsigned char> &kernel, in
 Image Morphology::dilate(Image &img, const std::vector<unsigned char> &kernel, int w, int h, unsigned iteration) {
     Image r = img;
     for (int i = 0; i < iteration; ++i) {
-        r = convolute(r, kernel, w, h, unitDilate);
+        r = convolute(r, kernel, w, h, unitDilate, 0);
     }
     return r;
 }
 
 Image Morphology::convolute(Image &img, const std::vector<unsigned char> &kernel, int w, int h,
-                           morphTransfo morphFunction) {
+                           morphTransfo morphFunction, int oobVal) {
     Image newImg = Image(img.getWidth(), img.getHeight());
     int centery = h / 2;
     int centerx = w / 2;
@@ -56,7 +56,7 @@ Image Morphology::convolute(Image &img, const std::vector<unsigned char> &kernel
                         (y + n - centery) < 0 ||
                         (y + n - centery) >= img.getHeight()) {
                         // outside the image pixels are interpreted are zeros
-                        vals.push_back(0);
+                        vals.push_back(oobVal);
                     } else {
                         vals.push_back(img.getPixel((x + m - centerx), (y + n - centery)));
                     }
