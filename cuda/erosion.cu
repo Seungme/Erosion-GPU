@@ -31,7 +31,6 @@ for (int i = 0; i < w; ++i) {
 
 
 __global__ void erosion(uint8_t *orig, uint8_t *morphed, unsigned width, unsigned height, unsigned side) {
-    printf("boop ");
     int kerMid = side / 2;
     int indexX = blockIdx.x * blockDim.x + threadIdx.x + kerMid;
     int indexY = blockIdx.y * blockDim.y + threadIdx.y + kerMid;
@@ -40,11 +39,14 @@ __global__ void erosion(uint8_t *orig, uint8_t *morphed, unsigned width, unsigne
         || indexY < kerMid || indexY >= height - kerMid)
         return;
 
-    morphed[indexY * width + indexX] = 255;
-
-    return;
+    //printf("%d, %d, ", indexX, indexY);
+    morphed[indexY * width + indexX] = 1;
+    //printf("morphed: %d\n",  morphed[indexY * width + indexX] );
+    //printf("orig: %d\n",  orig[indexY * width + indexX] );
+    
     for (int y = -kerMid; y <= kerMid; ++y) {
         for (int x = -kerMid; x <= kerMid; ++x) {
+
             morphed[indexX + indexY * width] = min(
                     morphed[indexY * width + indexX],
                     orig[(indexX + x) + (indexY + y) * width]
@@ -78,45 +80,62 @@ int main(int argc, char **argv)
     unsigned int kerSide = 3;
     // paddedImg
     uint8_t paddedImg[25] =   { 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0,
-                                0, 0, 1, 0, 0,
-                                0, 0, 0, 0, 0,
+                                0, 1, 1, 1, 0,
+                                0, 1, 1, 1, 0,
+                                0, 1, 1, 1, 0,
                                 0, 0, 0, 0, 0 };
 
-    uint8_t *result = new uint8_t[25]();
+    uint8_t *result = new uint8_t[25] { 128, 128, 128, 128, 128,
+                                        128, 128, 128, 128, 128,
+                                        128, 128, 128, 128, 128,
+                                        128, 128, 128, 128, 128,
+                                        128, 128, 128, 128, 128 };
 
 
     unsigned int paddedWidth  = imgWidth  + (kerSide  / 2) * 2;
     unsigned int paddedHeight = imgHeight + (kerSide / 2) * 2;
 
     unsigned int max = 8;
-    dim3 grids(ceilDivision(paddedWidth, max), ceilDivision(paddedHeight, max));
+    unsigned int gridw = ceilDivision(paddedWidth, max);
+    unsigned int gridh = ceilDivision(paddedHeight, max);
+
+    dim3 grids(gridw, gridh);
     dim3 threads(max, max);
 
 
     std::cout << "padW: " << paddedWidth << " padH: " << paddedHeight << std::endl;
-    std::cout << "grids: " << ceilDivision(paddedWidth, max) << " threads: " << max << std::endl;
+    std::cout << "gridw: " << gridw << " gridh: " << gridh  << " threads: " << max << std::endl;
     // TODO multithread cudaMalloc
     
     uint8_t *orig;
     uint8_t *eroded;
     uint8_t *ker;
 
-    cudaMalloc(&orig, sizeof (uint8_t) * paddedWidth * paddedHeight);
-    cudaMalloc(&eroded, sizeof (uint8_t) * paddedWidth * paddedHeight);
+    cudaMalloc(&orig, sizeof (uint8_t) * (gridw * max) * (gridh * max));
+    cudaMalloc(&eroded, sizeof (uint8_t) * (gridw * max) * (gridh * max));
     cudaMalloc(&ker, sizeof (uint8_t) * kerSide * kerSide);
 
-    cudaMemcpy(orig, paddedImg, sizeof (uint8_t) * paddedWidth * paddedHeight, cudaMemcpyHostToDevice);
+    cudaMemcpy(orig, paddedImg, sizeof (uint8_t) * (gridw * max) * (gridh * max), cudaMemcpyHostToDevice);
     cudaMemcpy(ker, kernel, sizeof (uint8_t) * kerSide * kerSide, cudaMemcpyHostToDevice);
 
     printMat(paddedImg, 5, 5);
+    printMat(result, 5, 5);
 
     erosion<<<grids, threads>>>(orig, eroded, paddedWidth, paddedHeight, kerSide);
 
-    cudaMemcpy(eroded, result, sizeof (uint8_t) * paddedWidth * paddedHeight, cudaMemcpyDeviceToHost);
+    cudaDeviceSynchronize();
 
+    cudaMemcpy(result, eroded, sizeof (uint8_t) * (gridw * max) * (gridh * max), cudaMemcpyDeviceToHost);
+   
+    std::cout << static_cast<int>(result[7]) << std::endl;
+    
+    cudaDeviceSynchronize();
     printMat(result, 5, 5);
 
+
+    cudaFree(eroded);
+    cudaFree(orig);
+    cudaFree(ker);
 
     return 0;
 
