@@ -78,6 +78,10 @@ Image Image::fromPPM(const std::string &filename, ImportType type) {
         throw std::domain_error("Wrong dimensions.");
     Image img = Image(width, height);
 
+    // flush newline character
+    char nl;
+    is.get(nl);
+
     char r;
     char g;
     char b;
