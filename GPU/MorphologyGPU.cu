@@ -23,7 +23,7 @@ void printMat(uint8_t *mat, unsigned w, unsigned h) {
     std::cout << "[ " << std::endl;
 for (int i = 0; i < w; ++i) {
         for (int j = 0; j < h; ++j) {
-            std::cout << static_cast<unsigned>(mat[i * w + j]) << " ";
+            std::cout << (static_cast<unsigned>(mat[i * w + j]) > 0  ? 'X' : '-') << " ";
         }
         std::cout << std::endl;
     }
@@ -98,11 +98,11 @@ int ceilDivision(int a, int b) {
 Image benchDilate(Image &img, uint8_t *kernel, int kerSide, int iterations) {
     Chronometer chrono = Chronometer("[GPU] Dilate");
 
-    Image padded = Image::addPadding(img, kerSide, 0);
+    Image padded = Image::addPadding(img, kerSide / 2, 0);
 
     uint8_t *result = new uint8_t[img.getHeight() * img.getWidth()];
 
-    unsigned int max = 512;
+    unsigned int max = 26;
     unsigned int gridw = ceilDivision(padded.getWidth(), max);
     unsigned int gridh = ceilDivision(padded.getHeight(), max);
 
@@ -110,8 +110,8 @@ Image benchDilate(Image &img, uint8_t *kernel, int kerSide, int iterations) {
     dim3 threads(max, max);
 
 
-//    std::cout << "padW: " << paddedWidth << " padH: " << paddedHeight << std::endl;
-//    std::cout << "gridw: " << gridw << " gridh: " << gridh  << " threads: " << max << std::endl;
+    std::cout << "padW: " << padded.getWidth() << " padH: " << padded.getHeight() << std::endl;
+    std::cout << "gridw: " << gridw << " gridh: " << gridh  << " threads: " << max << std::endl;
 
     uint8_t *orig;
     uint8_t *morphed;
@@ -124,13 +124,19 @@ Image benchDilate(Image &img, uint8_t *kernel, int kerSide, int iterations) {
     cudaMemcpy(orig, padded.pixelArray(), sizeof (uint8_t) * (gridw * max) * (gridh * max), cudaMemcpyHostToDevice);
     cudaMemcpy(ker, kernel, sizeof (uint8_t) * kerSide * kerSide, cudaMemcpyHostToDevice);
 
+    //printMat(padded.pixelArray(), padded.getWidth(), padded.getHeight());
 
-    erosion<<<grids, threads>>>(orig, padded.getWidth(), padded.getHeight(), morphed, img.getWidth(), ker, kerSide);
+    dilation<<<grids, threads>>>(orig, padded.getWidth(), padded.getHeight(), morphed, img.getWidth(), ker, kerSide);
+
+    cudaError err = cudaGetLastError();
+    if ( cudaSuccess != err )
+        printf( "Error: %s\n", cudaGetErrorString(err) );
 
     cudaDeviceSynchronize();
 
     cudaMemcpy(result, morphed, sizeof (uint8_t) * img.getWidth() * img.getHeight(), cudaMemcpyDeviceToHost);
 
+    //printMat(result, img.getWidth(), img.getHeight());
 
     cudaDeviceSynchronize();
 
@@ -145,7 +151,7 @@ int main(int argc, char **argv)
 {
 
     Image img = Image::fromPPM("../Data/RealSnake.ppm", Image::ImportType::BINARY);
-    unsigned char *kernel = Morphology::kerSquareArray(3);
+    unsigned char *kernel = Morphology::kerSquareArray(1);
     Image result = benchDilate(img, kernel, 3, 1);
     result.writePPM("result.ppm");
 
