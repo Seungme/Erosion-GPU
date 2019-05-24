@@ -6,19 +6,17 @@
 #include <exception>
 
 Image::Image(int width, int height)
-        :pixels(std::vector<unsigned char>(width * height)),
+        :pixels(new uint8_t[width * height]()),
          width(width),
          height(height)
 {
 }
 
-Image::Image(int width, int height, const std::vector<unsigned char> &pxls)
+Image::Image(int width, int height, uint8_t *pxls)
         :pixels(pxls),
          width(width),
          height(height)
 {
-    if (pxls.size() != width * height)
-        throw std::out_of_range("Pixel vector size != width * height.");
 }
 
 void Image::writePPM(const std::string &filename) const {
@@ -54,11 +52,11 @@ int Image::getHeight() const {
     return height;
 }
 
-unsigned char Image::getPixel(int x, int y) const {
+uint8_t Image::getPixel(int x, int y) const {
     return pixels[y * width + x];
 }
 
-Image Image::fromPPM(const std::string &filename) {
+Image Image::fromPPM(const std::string &filename, ImportType type) {
     std::ifstream is(filename);
     std::string str;
     is >> str; // P6
@@ -78,12 +76,22 @@ Image Image::fromPPM(const std::string &filename) {
         is.get(r); // r
         is.get(g); // g
         is.get(b); // b
-        img.pixels[i++] = (static_cast<unsigned int>(r) +
-                           static_cast<unsigned int>(g) +
-                           static_cast<unsigned int>(b)) / 3.0 > 127 ? 255 : 0;
+        if (type == ImportType::GRAY) { // GRAY
+            img.pixels[i++] = (static_cast<unsigned char>(r) * 0.2126 +
+                               static_cast<unsigned char>(g) * 0.7152 +
+                    static_cast<unsigned char>(b) * 0.0722); // > 127 ? 255 : 0;
+        } else {                        // BINARY
+            img.pixels[i++] = (static_cast<unsigned int>(r) +
+                               static_cast<unsigned int>(g) +
+                               static_cast<unsigned int>(b)) / 3.0 > 127 ? 255 : 0;
+        }
     }
     if (i - 1 != width * height)
         throw std::domain_error("Wrong number of pixels (" + std::to_string(i) + " != " + std::to_string(width * height) +  ").");
     return img;
+}
+
+uint8_t *Image::pixelArray() {
+
 }
 

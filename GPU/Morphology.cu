@@ -92,102 +92,102 @@ int ceilDivision(int a, int b) {
 }
 
 
-int main(int argc, char **argv)
-{
-
-    // img
-    uint8_t img[9] = { 1, 1, 1,
-                       1, 1, 1,
-                       1, 1, 1 };
-    unsigned int imgWidth = 13;
-    unsigned int imgHeight = 13;
-    // kernel
-    uint8_t kernel[9] = { 1, 1, 1,
-                          1, 1, 1,
-                          1, 1, 1 };
-    unsigned int kerSide = 3;
-    // paddedImg
-    /*
-    uint8_t paddedImg[25] =   { 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0,
-                                0, 0, 1, 0, 0,
-                                0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0 };
-*/
-    uint8_t paddedImg[225] = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    };
-/*
-    uint8_t *result = new uint8_t[25] { 128, 128, 128, 128, 128,
-                                        128, 128, 128, 128, 128,
-                                        128, 128, 128, 128, 128,
-                                        128, 128, 128, 128, 128,
-                                        128, 128, 128, 128, 128 };
-*/
-    uint8_t *result = new uint8_t[196]();
-
-    unsigned int paddedWidth  = imgWidth  + (kerSide  / 2) * 2;
-    unsigned int paddedHeight = imgHeight + (kerSide / 2) * 2;
-
-    unsigned int max = 8;
-    unsigned int gridw = ceilDivision(paddedWidth, max);
-    unsigned int gridh = ceilDivision(paddedHeight, max);
-
-    dim3 grids(gridw, gridh);
-    dim3 threads(max, max);
-
-
-    std::cout << "padW: " << paddedWidth << " padH: " << paddedHeight << std::endl;
-    std::cout << "gridw: " << gridw << " gridh: " << gridh  << " threads: " << max << std::endl;
-    // TODO multithread cudaMalloc
-    
-    uint8_t *orig;
-    uint8_t *eroded;
-    uint8_t *ker;
-
-    cudaMalloc(&orig, sizeof (uint8_t) * (gridw * max) * (gridh * max));
-    cudaMalloc(&eroded, sizeof (uint8_t) * imgWidth * imgHeight);
-    cudaMalloc(&ker, sizeof (uint8_t) * kerSide * kerSide);
-
-    cudaMemcpy(orig, paddedImg, sizeof (uint8_t) * (gridw * max) * (gridh * max), cudaMemcpyHostToDevice);
-    cudaMemcpy(ker, kernel, sizeof (uint8_t) * kerSide * kerSide, cudaMemcpyHostToDevice);
-
-    printMat(paddedImg, 15, 15);
-    //printMat(result, 13, 13);
-
-    erosion<<<grids, threads>>>(orig, paddedWidth, paddedHeight, eroded, imgWidth, ker, kerSide);
-    //printf("orig: %d\n",  orig[indexY * width + indexX] );
-
-    cudaDeviceSynchronize();
-
-    cudaMemcpy(result, eroded, sizeof (uint8_t) * imgWidth * imgHeight, cudaMemcpyDeviceToHost);
-   
-    std::cout << static_cast<int>(result[7]) << std::endl;
-    
-    cudaDeviceSynchronize();
-    printMat(result, 13, 13);
-
-
-    cudaFree(eroded);
-    cudaFree(orig);
-    cudaFree(ker);
-
-    return 0;
-
+//int main(int argc, char **argv)
+//{
+//
+//    // img
+//    uint8_t img[9] = { 1, 1, 1,
+//                       1, 1, 1,
+//                       1, 1, 1 };
+//    unsigned int imgWidth = 13;
+//    unsigned int imgHeight = 13;
+//    // kernel
+//    uint8_t kernel[9] = { 1, 1, 1,
+//                          1, 1, 1,
+//                          1, 1, 1 };
+//    unsigned int kerSide = 3;
+//    // paddedImg
+//    /*
+//    uint8_t paddedImg[25] =   { 0, 0, 0, 0, 0,
+//                                0, 0, 0, 0, 0,
+//                                0, 0, 1, 0, 0,
+//                                0, 0, 0, 0, 0,
+//                                0, 0, 0, 0, 0 };
+//*/
+//    uint8_t paddedImg[225] = {
+//    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+//    0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0,
+//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+//    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+//    };
+///*
+//    uint8_t *result = new uint8_t[25] { 128, 128, 128, 128, 128,
+//                                        128, 128, 128, 128, 128,
+//                                        128, 128, 128, 128, 128,
+//                                        128, 128, 128, 128, 128,
+//                                        128, 128, 128, 128, 128 };
+//*/
+//    uint8_t *result = new uint8_t[196]();
+//
+//    unsigned int paddedWidth  = imgWidth  + (kerSide  / 2) * 2;
+//    unsigned int paddedHeight = imgHeight + (kerSide / 2) * 2;
+//
+//    unsigned int max = 8;
+//    unsigned int gridw = ceilDivision(paddedWidth, max);
+//    unsigned int gridh = ceilDivision(paddedHeight, max);
+//
+//    dim3 grids(gridw, gridh);
+//    dim3 threads(max, max);
+//
+//
+//    std::cout << "padW: " << paddedWidth << " padH: " << paddedHeight << std::endl;
+//    std::cout << "gridw: " << gridw << " gridh: " << gridh  << " threads: " << max << std::endl;
+//    // TODO multithread cudaMalloc
+//
+//    uint8_t *orig;
+//    uint8_t *eroded;
+//    uint8_t *ker;
+//
+//    cudaMalloc(&orig, sizeof (uint8_t) * (gridw * max) * (gridh * max));
+//    cudaMalloc(&eroded, sizeof (uint8_t) * imgWidth * imgHeight);
+//    cudaMalloc(&ker, sizeof (uint8_t) * kerSide * kerSide);
+//
+//    cudaMemcpy(orig, paddedImg, sizeof (uint8_t) * (gridw * max) * (gridh * max), cudaMemcpyHostToDevice);
+//    cudaMemcpy(ker, kernel, sizeof (uint8_t) * kerSide * kerSide, cudaMemcpyHostToDevice);
+//
+//    printMat(paddedImg, 15, 15);
+//    //printMat(result, 13, 13);
+//
+//    erosion<<<grids, threads>>>(orig, paddedWidth, paddedHeight, eroded, imgWidth, ker, kerSide);
+//    //printf("orig: %d\n",  orig[indexY * width + indexX] );
+//
+//    cudaDeviceSynchronize();
+//
+//    cudaMemcpy(result, eroded, sizeof (uint8_t) * imgWidth * imgHeight, cudaMemcpyDeviceToHost);
+//
+//    std::cout << static_cast<int>(result[7]) << std::endl;
+//
+//    cudaDeviceSynchronize();
+//    printMat(result, 13, 13);
+//
+//
+//    cudaFree(eroded);
+//    cudaFree(orig);
+//    cudaFree(ker);
+//
+//    return 0;
+//
 /*
 
 

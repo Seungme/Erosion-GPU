@@ -7,18 +7,27 @@
 
 #include <vector>
 #include <string>
+#include <cstdint>
 #include <sstream>
 #include <iostream>
 #include <fstream>
 
 class Image {
 public:
+    enum class ImportType {
+        BINARY,
+        GRAY
+    };
+
+public:
     Image(int width, int height);
-    Image(int width, int height, const std::vector<unsigned char> &pxls);
+    Image(int width, int height, uint8_t *pxls);
 
     void setPixel(int x, int y, unsigned char val);
 
-    unsigned char getPixel(int x, int y) const;
+    uint8_t getPixel(int x, int y) const;
+
+    uint8_t *pixelArray();
 
     void writePPM(const std::string &filename) const;
 
@@ -26,13 +35,10 @@ public:
 
     int getHeight() const;
 
-    static Image fromPPM(const std::string &filename);
+    static Image fromPPM(const std::string &filename, ImportType type = ImportType::GRAY);
 
 private:
-
-
-private:
-    std::vector<unsigned char> pixels;
+    uint8_t *pixels;
     int width;
     int height;
 };
