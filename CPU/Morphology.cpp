@@ -94,11 +94,11 @@ std::vector<std::vector<unsigned char>> Morphology::kerCircle(int side) {
     return res;
 }
 
-unsigned char *kerSquareArray(int side) {
+unsigned char *Morphology::kerSquareArray(int side) {
     return new unsigned char[side * side]();
 }
 
-unsigned char *kerCircleArray(int side) {
+unsigned char *Morphology::kerCircleArray(int side) {
     auto *ker = new unsigned char[side * side]();
     int mid = side / 2;
     for (int y = 0; y < side; ++y) {
