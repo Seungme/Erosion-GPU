@@ -113,4 +113,32 @@ namespace Examples {
         dilatedEroded.writePPM("after_dilate_erode.ppm");
     }
 
+
+
+    Image benchErode(Image &img, const std::vector<std::vector<unsigned char>> &ker, int iterations) {
+        Chronometer chrono = Chronometer("[CPU] Erosion");
+
+        return Morphology::erode(img, ker, iterations);
+    }
+
+    Image benchDilate(Image &img, const std::vector<std::vector<unsigned char>> &ker, int iterations) {
+        Chronometer chrono = Chronometer("[CPU] Dilation");
+
+        return Morphology::dilate(img, ker, iterations);
+    }
+
+    Image benchOpen(Image &img, const std::vector<std::vector<unsigned char>> &ker, int iterations) {
+        Chronometer chrono = Chronometer("[CPU] Opening");
+
+        auto erode = Morphology::erode(img, ker, iterations);
+        return Morphology::dilate(erode, ker, iterations);
+    }
+
+    Image benchClose(Image &img, const std::vector<std::vector<unsigned char>> &ker, int iterations) {
+        Chronometer chrono = Chronometer("[CPU] Closing");
+
+        auto dilate = Morphology::dilate(img, ker, iterations);
+        return Morphology::erode(dilate, ker, iterations);
+    }
+
 }

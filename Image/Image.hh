@@ -21,6 +21,7 @@ public:
 
 public:
     Image(int width, int height);
+    Image(int width, int height, unsigned char fillValue);
     Image(int width, int height, uint8_t *pxls);
 
     void setPixel(int x, int y, unsigned char val);
@@ -36,6 +37,8 @@ public:
     int getHeight() const;
 
     static Image fromPPM(const std::string &filename, ImportType type = ImportType::GRAY);
+
+    static Image addPadding(const Image &img, int padding, unsigned char fillValue);
 
 private:
     uint8_t *pixels;

@@ -18,6 +18,10 @@ namespace Examples {
 
     void complexImage(Image &img, unsigned iterations);
 
+    Image benchErode(Image &img, const std::vector<std::vector<unsigned char>> &ker, int iterations);
+    Image benchDilate(Image &img, const std::vector<std::vector<unsigned char>> &ker, int iterations);
+    Image benchOpen(Image &img, const std::vector<std::vector<unsigned char>> &ker, int iterations);
+    Image benchClose(Image &img, const std::vector<std::vector<unsigned char>> &ker, int iterations);
 };
 
 

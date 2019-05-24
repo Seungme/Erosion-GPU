@@ -12,6 +12,16 @@ Image::Image(int width, int height)
 {
 }
 
+Image::Image(int width, int height, unsigned char fillValue)
+        :pixels(new uint8_t[width * height]),
+         width(width),
+         height(height)
+{
+    for (int i = 0; i < width * height; ++i) {
+        pixels[i] = fillValue;
+    }
+}
+
 Image::Image(int width, int height, uint8_t *pxls)
         :pixels(pxls),
          width(width),
@@ -92,6 +102,17 @@ Image Image::fromPPM(const std::string &filename, ImportType type) {
 }
 
 uint8_t *Image::pixelArray() {
+    return pixels;
+}
 
+Image Image::addPadding(const Image &img, int padding, unsigned char fillValue) {
+    Image res = Image(img.width + 2 * padding, img.height + 2 * padding, fillValue);
+
+    for (int y = padding; y < img.height + padding; ++y) {
+        for (int x = padding; x < img.width + padding; ++x) {
+            res.setPixel(x, y, img.getPixel(x - padding, y - padding));
+        }
+    }
+    return res;
 }
 

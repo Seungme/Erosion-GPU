@@ -3,6 +3,9 @@
 #include <cstdint>
 #include <iostream>
 #include <stdio.h>
+#include "../Image/Image.hh"
+#include "../Chronometer.hh"
+#include "../CPU/Morphology.hh"
 
 __global__ void copy(uint8_t *orig, uint8_t *morphed, unsigned width) {
     int indexX = blockIdx.x * blockDim.x + threadIdx.x;
@@ -92,141 +95,64 @@ int ceilDivision(int a, int b) {
 }
 
 
-//int main(int argc, char **argv)
-//{
-//
-//    // img
-//    uint8_t img[9] = { 1, 1, 1,
-//                       1, 1, 1,
-//                       1, 1, 1 };
-//    unsigned int imgWidth = 13;
-//    unsigned int imgHeight = 13;
-//    // kernel
-//    uint8_t kernel[9] = { 1, 1, 1,
-//                          1, 1, 1,
-//                          1, 1, 1 };
-//    unsigned int kerSide = 3;
-//    // paddedImg
-//    /*
-//    uint8_t paddedImg[25] =   { 0, 0, 0, 0, 0,
-//                                0, 0, 0, 0, 0,
-//                                0, 0, 1, 0, 0,
-//                                0, 0, 0, 0, 0,
-//                                0, 0, 0, 0, 0 };
-//*/
-//    uint8_t paddedImg[225] = {
-//    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-//    0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0,
-//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-//    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-//    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-//    };
-///*
-//    uint8_t *result = new uint8_t[25] { 128, 128, 128, 128, 128,
-//                                        128, 128, 128, 128, 128,
-//                                        128, 128, 128, 128, 128,
-//                                        128, 128, 128, 128, 128,
-//                                        128, 128, 128, 128, 128 };
-//*/
-//    uint8_t *result = new uint8_t[196]();
-//
-//    unsigned int paddedWidth  = imgWidth  + (kerSide  / 2) * 2;
-//    unsigned int paddedHeight = imgHeight + (kerSide / 2) * 2;
-//
-//    unsigned int max = 8;
-//    unsigned int gridw = ceilDivision(paddedWidth, max);
-//    unsigned int gridh = ceilDivision(paddedHeight, max);
-//
-//    dim3 grids(gridw, gridh);
-//    dim3 threads(max, max);
-//
-//
+Image benchDilate(Image &img, uint8_t *kernel, int iterations) {
+    Chronometer chrono = Chronometer("[GPU] Dilate");
+
+    Image padded = Image::addPadding(img, ker.size() / 2, 0);
+
+    uint8_t *result = new uint8_t[img.getHeight() * img.getWidth()];
+
+    unsigned int max = 512;
+    unsigned int gridw = ceilDivision(padded.getWidth(), max);
+    unsigned int gridh = ceilDivision(padded.getHeight(), max);
+
+    dim3 grids(gridw, gridh);
+    dim3 threads(max, max);
+
+
 //    std::cout << "padW: " << paddedWidth << " padH: " << paddedHeight << std::endl;
 //    std::cout << "gridw: " << gridw << " gridh: " << gridh  << " threads: " << max << std::endl;
-//    // TODO multithread cudaMalloc
-//
-//    uint8_t *orig;
-//    uint8_t *eroded;
-//    uint8_t *ker;
-//
-//    cudaMalloc(&orig, sizeof (uint8_t) * (gridw * max) * (gridh * max));
-//    cudaMalloc(&eroded, sizeof (uint8_t) * imgWidth * imgHeight);
-//    cudaMalloc(&ker, sizeof (uint8_t) * kerSide * kerSide);
-//
-//    cudaMemcpy(orig, paddedImg, sizeof (uint8_t) * (gridw * max) * (gridh * max), cudaMemcpyHostToDevice);
-//    cudaMemcpy(ker, kernel, sizeof (uint8_t) * kerSide * kerSide, cudaMemcpyHostToDevice);
-//
-//    printMat(paddedImg, 15, 15);
-//    //printMat(result, 13, 13);
-//
-//    erosion<<<grids, threads>>>(orig, paddedWidth, paddedHeight, eroded, imgWidth, ker, kerSide);
-//    //printf("orig: %d\n",  orig[indexY * width + indexX] );
-//
-//    cudaDeviceSynchronize();
-//
-//    cudaMemcpy(result, eroded, sizeof (uint8_t) * imgWidth * imgHeight, cudaMemcpyDeviceToHost);
-//
-//    std::cout << static_cast<int>(result[7]) << std::endl;
-//
-//    cudaDeviceSynchronize();
-//    printMat(result, 13, 13);
-//
-//
-//    cudaFree(eroded);
-//    cudaFree(orig);
-//    cudaFree(ker);
-//
-//    return 0;
-//
-/*
 
-
-
-    // data on HOST memory
-    uint8_t *ma = new uint8_t[9] { 'E', 'A', 'j', '1', 'h', '0', 'q', 'd', 'w' };
-    uint8_t *mo = new uint8_t[9] { 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x' };
-
-    // GPU memory allocation
-    uint8_t *mat;
+    uint8_t *orig;
     uint8_t *morphed;
-    cudaMalloc(&mat, 9 * sizeof (uint8_t));
-    cudaMalloc(&morphed, 9 * sizeof (uint8_t));
+    uint8_t *ker;
 
-    // copy HOST memory to GPU memory
-    cudaMemcpy(mat, ma, sizeof(uint8_t) * 9, cudaMemcpyHostToDevice);
-    cudaMemcpy(morphed, mo, sizeof(uint8_t) * 9, cudaMemcpyHostToDevice);
+    cudaMalloc(&orig, sizeof (uint8_t) * (gridw * max) * (gridh * max));
+    cudaMalloc(&morphed, sizeof (uint8_t) * imgWidth * imgHeight);
+    cudaMalloc(&ker, sizeof (uint8_t) * kerSide * kerSide);
 
+    cudaMemcpy(orig, padded, sizeof (uint8_t) * (gridw * max) * (gridh * max), cudaMemcpyHostToDevice);
+    cudaMemcpy(ker, kernel, sizeof (uint8_t) * kerSide * kerSide, cudaMemcpyHostToDevice);
 
-    printMat(ma, 9);
+    printMat(padded, 15, 15);
+    //printMat(result, 13, 13);
 
-    int nthreads = 9;
-    const int n = 128 * 1024;
-    int blockSize = 512;
-    int nbBlocks = n / nthreads;
-    dim3 grids(3, 3);
+    erosion<<<grids, threads>>>(orig, padded.getWidth(), padded.getHeight(), morphed, imgWidth, ker, kerSide);
+    //printf("orig: %d\n",  orig[indexY * width + indexX] );
 
+    cudaDeviceSynchronize();
 
-    // compute on GPU
-    erosion<<<grids, threads>>>(mat, morphed, 3);
+    cudaMemcpy(result, morphed, sizeof (uint8_t) * imgWidth * imgHeight, cudaMemcpyDeviceToHost);
 
-    // copy back GPU memory to HOST memory
-    cudaMemcpy(mo, morphed, sizeof (uint8_t) * 9, cudaMemcpyDeviceToHost);
+    std::cout << static_cast<int>(result[7]) << std::endl;
 
-    printMat(mo, 9);
+    cudaDeviceSynchronize();
+//    printMat(result, 13, 13);
+
+    cudaFree(morphed);
+    cudaFree(orig);
+    cudaFree(ker);
+
+    return Image(img.getWidth(), img.getHeight(), result);
+}
+
+int main(int argc, char **argv)
+{
+
+    Image img = Image::fromPPM("../Data/RealSnake.ppm", Image::ImportType::BINARY);
+    unsigned char *kernel = Morphology::kerSquareArray(3);
+    benchDilate(img, kernel, 1);
 
     return 0;
-
-*/
-
 }
 

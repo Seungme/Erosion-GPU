@@ -3,6 +3,7 @@
 //
 
 #include <cmath>
+#include <cstdint>
 #include "Morphology.hh"
 
 unsigned char unitErode(const std::vector<unsigned char> &vals) {
@@ -51,7 +52,7 @@ Image Morphology::convolute(Image &img, const std::vector<std::vector<unsigned c
             vals.clear();
             for (int n = 0; n < kernel.size(); ++n) {
                 for (int m = 0; m < kernel[0].size(); ++m) {
-                    // skip if point in kernel in a zero
+                    // skip if value in kernel is a zero
                     if (kernel[n][m] == 0)
                         continue;
                     if ((x + m - centerx) < 0 ||
@@ -91,5 +92,20 @@ std::vector<std::vector<unsigned char>> Morphology::kerCircle(int side) {
         }
     }
     return res;
+}
+
+unsigned char *kerSquareArray(int side) {
+    return new unsigned char[side * side]();
+}
+
+unsigned char *kerCircleArray(int side) {
+    auto *ker = new unsigned char[side * side]();
+    int mid = side / 2;
+    for (int y = 0; y < side; ++y) {
+        for (int x = 0; x < side; ++x) {
+            ker[y * side + x] = std::pow((y - mid), 2) + std::pow((x - mid), 2) <= std::pow(mid, 2);
+        }
+    }
+    return ker;
 }
 
