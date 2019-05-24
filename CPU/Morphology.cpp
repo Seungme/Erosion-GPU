@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <cstring>
 #include "Morphology.hh"
 
 unsigned char unitErode(const std::vector<unsigned char> &vals) {
@@ -95,7 +96,9 @@ std::vector<std::vector<unsigned char>> Morphology::kerCircle(int side) {
 }
 
 unsigned char *Morphology::kerSquareArray(int side) {
-    return new unsigned char[side * side]();
+    auto ker = new unsigned char[side * side];
+    memset(ker, 1, sizeof (unsigned char) * side * side);
+    return ker;
 }
 
 unsigned char *Morphology::kerCircleArray(int side) {
