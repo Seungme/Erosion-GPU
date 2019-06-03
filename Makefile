@@ -15,7 +15,7 @@ gpu: $(OBJ_FILES)
 	nvcc -o GPU_EXEC $(OBJ_FILES) $(GPU_FILE)
 	rm *.o
 
-.PHONY: CPU_EXEC GPU_EXEC
+.PHONY: cpu gpu
 
 clean:
-	rm CPU GPU
+	rm CPU_EXEC GPU_EXEC
