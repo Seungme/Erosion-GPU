@@ -102,7 +102,7 @@ Image benchDilate(Image &img, uint8_t *kernel, int kerSide, int iterations) {
 
     uint8_t *result = new uint8_t[img.getHeight() * img.getWidth()];
 
-    unsigned int max = 26;
+    unsigned int max = 32;
     unsigned int gridw = ceilDivision(padded.getWidth(), max);
     unsigned int gridh = ceilDivision(padded.getHeight(), max);
 
@@ -110,8 +110,8 @@ Image benchDilate(Image &img, uint8_t *kernel, int kerSide, int iterations) {
     dim3 threads(max, max);
 
 
-    std::cout << "padW: " << padded.getWidth() << " padH: " << padded.getHeight() << std::endl;
-    std::cout << "gridw: " << gridw << " gridh: " << gridh  << " threads: " << max << std::endl;
+    //std::cout << "padW: " << padded.getWidth() << " padH: " << padded.getHeight() << std::endl;
+    //std::cout << "gridw: " << gridw << " gridh: " << gridh  << " threads: " << max << std::endl;
 
     uint8_t *orig;
     uint8_t *morphed;
@@ -150,7 +150,7 @@ Image benchDilate(Image &img, uint8_t *kernel, int kerSide, int iterations) {
 int main(int argc, char **argv)
 {
 
-    Image img = Image::fromPPM("../Data/RealSnake.ppm", Image::ImportType::BINARY);
+    Image img = Image::fromPPM(argv[1], Image::ImportType::BINARY);
     unsigned char *kernel = Morphology::kerSquareArray(5);
     Image result = benchDilate(img, kernel, 3, 1);
     result.writePPM("result.ppm");
