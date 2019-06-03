@@ -151,8 +151,9 @@ int main(int argc, char **argv)
 {
 
     Image img = Image::fromPPM(argv[1], Image::ImportType::BINARY);
-    unsigned char *kernel = Morphology::kerSquareArray(5);
-    Image result = benchDilate(img, kernel, 3, 1);
+    int kerSize = atoi(argv[2]);
+    unsigned char *kernel = Morphology::kerSquareArray(kerSize);
+    Image result = benchDilate(img, kernel, kerSize, 1);
     result.writePPM("result.ppm");
 
     return 0;
