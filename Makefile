@@ -8,15 +8,16 @@ LDXX_FLAGS = -pthread -m64 -march=native -fopt-info-vec-optimized -O3
 
 cpu: $(OBJ_FILES)
 	$(CC) main.cpp -o CPU_EXEC $(OBJ_FILES) $(CXX_FLAGS)
-	rm *.o
+	rm $(OBJ_FILES)
 
-vect: $(OBJ_FILES)
-	$(CC) main.cpp -o CPU_VECT_EXEC $(OBJ_FILES) $(CXX_FLAGS) $(LDXX_FLAGS)
-	rm *.o
+vect:
+	$(CC) -c $(CPP_FILES) $(CXX_FLAGS) $(LDXX_FLAGS)
+	$(CC) main.cpp -o CPU_VECT_EXEC *.o $(CXX_FLAGS) $(LDXX_FLAGS)
+#	rm *.o
 
 gpu: $(OBJ_FILES)
 	nvcc -o GPU_EXEC $(OBJ_FILES) $(GPU_FILE)
-	rm *.o
+	rm $(OBJ_FILES)
 
 .PHONY: cpu vect gpu
 
