@@ -199,12 +199,41 @@ Image benchErode(Image &img, uint8_t *kernel, int kerSide, int iterations) {
     return Image(img.getWidth(), img.getHeight(), result);
 }
 
+enum class kerShape : int {
+    SQUARE = 0,
+    CIRCLE = 1
+};
+
 int main(int argc, char **argv)
 {
+    kerShape shape = kerShape::SQUARE;
+    unsigned kerSize = 3;
 
-    Image img = Image::fromPPM(argv[1], Image::ImportType::BINARY);
-    int kerSize = atoi(argv[2]);
-    unsigned char *kernel = Morphology::kerSquareArray(kerSize);
+    if (argc < 2 || argc > 4) {
+        std::cerr << "Usage: " << argv[0] << " INPUT_IMAGE [KERNEL_SIZE] [KERNEL_SHAPE]." << std::endl << "       With KERNEL_SHAPE = {'square' (default), 'circle'}" << std::endl;
+        return 1;
+    }
+    if (argc >= 3) {
+        kerSize = atoi(argv[2]);
+    }
+    if (argc == 4) {
+        if (std::string(argv[3]) == "square")
+            shape = kerShape::SQUARE;
+        else if (std::string(argv[3]) == "circle")
+            shape = kerShape::CIRCLE;
+    }
+
+    std::vector<std::vector<unsigned char>> ker;
+    switch (shape) {
+        case kerShape::SQUARE:
+            ker = Morphology::kerSquareArray(kerSize);
+            break;
+        case kerShape::CIRCLE:
+            ker = Morphology::kerCircleArray(kerSize);
+            break;
+    }
+
+    Image img = Image::fromPPM(argv[1], Image::ImportType::GRAY);
     Image result = benchDilate(img, kernel, kerSize, 1);
     result.writePPM("GPUDilate.ppm");
     Image result = benchErode(img, kernel, kerSize, 1);
