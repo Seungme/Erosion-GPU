@@ -21,5 +21,8 @@ gpu: $(OBJ_FILES)
 
 .PHONY: cpu vect gpu
 
+clean-imgs:
+	$(RM) *.ppm
+
 clean:
-	rm CPU_EXEC GPU_EXEC CPU_VECT_EXEC
+	$(RM) CPU_EXEC GPU_EXEC CPU_VECT_EXEC

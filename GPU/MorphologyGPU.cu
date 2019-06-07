@@ -147,6 +147,58 @@ Image benchDilate(Image &img, uint8_t *kernel, int kerSide, int iterations) {
     return Image(img.getWidth(), img.getHeight(), result);
 }
 
+Image benchErode(Image &img, uint8_t *kernel, int kerSide, int iterations) {
+    Chronometer chrono = Chronometer("[GPU] Dilate");
+
+    Image padded = Image::addPadding(img, kerSide / 2, 0);
+
+    uint8_t *result = new uint8_t[img.getHeight() * img.getWidth()];
+
+    unsigned int max = 32;
+    unsigned int gridw = ceilDivision(padded.getWidth(), max);
+    unsigned int gridh = ceilDivision(padded.getHeight(), max);
+
+    dim3 grids(gridw, gridh);
+    dim3 threads(max, max);
+
+
+    //std::cout << "padW: " << padded.getWidth() << " padH: " << padded.getHeight() << std::endl;
+    //std::cout << "gridw: " << gridw << " gridh: " << gridh  << " threads: " << max << std::endl;
+
+    uint8_t *orig;
+    uint8_t *morphed;
+    uint8_t *ker;
+
+    cudaMalloc(&orig, sizeof (uint8_t) * (gridw * max) * (gridh * max));
+    cudaMalloc(&morphed, sizeof (uint8_t) * img.getWidth() * img.getHeight());
+    cudaMalloc(&ker, sizeof (uint8_t) * kerSide * kerSide);
+
+    cudaMemcpy(orig, padded.pixelArray(), sizeof (uint8_t) * (gridw * max) * (gridh * max), cudaMemcpyHostToDevice);
+    cudaMemcpy(ker, kernel, sizeof (uint8_t) * kerSide * kerSide, cudaMemcpyHostToDevice);
+
+    //printMat(padded.pixelArray(), padded.getWidth(), padded.getHeight());
+
+    erosion<<<grids, threads>>>(orig, padded.getWidth(), padded.getHeight(), morphed, img.getWidth(), ker, kerSide);
+
+    cudaError err = cudaGetLastError();
+    if ( cudaSuccess != err )
+        printf( "Error: %s\n", cudaGetErrorString(err) );
+
+    cudaDeviceSynchronize();
+
+    cudaMemcpy(result, morphed, sizeof (uint8_t) * img.getWidth() * img.getHeight(), cudaMemcpyDeviceToHost);
+
+    //printMat(result, img.getWidth(), img.getHeight());
+
+    cudaDeviceSynchronize();
+
+    cudaFree(morphed);
+    cudaFree(orig);
+    cudaFree(ker);
+
+    return Image(img.getWidth(), img.getHeight(), result);
+}
+
 int main(int argc, char **argv)
 {
 
@@ -154,7 +206,10 @@ int main(int argc, char **argv)
     int kerSize = atoi(argv[2]);
     unsigned char *kernel = Morphology::kerSquareArray(kerSize);
     Image result = benchDilate(img, kernel, kerSize, 1);
-    result.writePPM("result.ppm");
+    result.writePPM("GPUDilate.ppm");
+    Image result = benchErode(img, kernel, kerSize, 1);
+    result.writePPM("GPUErode.ppm");
+    img.writePPM("original.ppm");
 
     return 0;
 }
