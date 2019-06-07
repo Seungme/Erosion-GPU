@@ -223,7 +223,7 @@ int main(int argc, char **argv)
             shape = kerShape::CIRCLE;
     }
 
-    std::vector<std::vector<unsigned char>> ker;
+    unsigned char *ker = nullptr;
     switch (shape) {
         case kerShape::SQUARE:
             ker = Morphology::kerSquareArray(kerSize);
@@ -234,9 +234,9 @@ int main(int argc, char **argv)
     }
 
     Image img = Image::fromPPM(argv[1], Image::ImportType::GRAY);
-    Image result = benchDilate(img, kernel, kerSize, 1);
+    Image result = benchDilate(img, ker, kerSize, 1);
     result.writePPM("GPUDilate.ppm");
-    Image result = benchErode(img, kernel, kerSize, 1);
+    result = benchErode(img, ker, kerSize, 1);
     result.writePPM("GPUErode.ppm");
     img.writePPM("original.ppm");
 
