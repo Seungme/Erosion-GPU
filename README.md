@@ -2,8 +2,8 @@
 
 ## Introduction
 
-This code let's you apply the most common morphological operators to
-an image. This is a quick project and is not meant to be complete.  
+This code lets you apply the most common morphological operators to
+an image. 
 The project implements the erosion and dilation operators.  
 The idea was to compare CPU vs GPU performances on morphological 
 operators.
@@ -12,9 +12,9 @@ operators.
 
 #### Requirements
 
-This project uses Nvidia's **Cuda**, you'll need a Nvidia GPU and `nvcc`
-installed.  
-You can still run the cpu versions even if you dont have `nvcc` !
+This project uses Nvidia's **Cuda**, you will need a Nvidia GPU and `nvcc`
+installed.
+You can still run the cpu version even if you don't have `nvcc` !
 
 
 #### Build
